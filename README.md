@@ -181,6 +181,18 @@ Caused by:
 2. Jika masalah berlanjut, hapus `Cargo.lock` dari project dan biarkan Docker build menghasilkannya sendiri
 3. Atau gunakan image Docker dengan versi Rust yang lebih baru yang mendukung format Cargo.lock versi 4
 
+**Masalah: Dependensi membutuhkan Rust versi lebih baru**
+
+Jika Anda mendapatkan error seperti:
+```
+error: package `native-tls v0.2.14` cannot be built because it requires rustc 1.80.0 or newer, while the currently active rustc version is 1.76.0
+```
+
+**Solusi**:
+1. Dockerfile telah diperbarui untuk menggunakan Rust 1.80 atau versi yang lebih baru
+2. Anda juga bisa menggunakan versi nightly untuk dukungan fitur terbaru
+3. Jika tetap bermasalah, coba jalankan perintah `./run-docker.sh clean-lock` atau `run-docker.bat clean-lock` untuk membersihkan Cargo.lock, lalu build ulang
+
 **Masalah: Edition 2024 tidak didukung**
 
 Jika Anda mendapatkan error seperti:

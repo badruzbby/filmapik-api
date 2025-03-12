@@ -1,4 +1,4 @@
-FROM rust:1.76-slim as builder
+FROM rust:1.80-slim as builder
 
 WORKDIR /app
 
@@ -7,6 +7,12 @@ COPY Cargo.toml ./
 
 # Buat Cargo.lock baru di dalam container (jangan gunakan yang dari host)
 RUN touch Cargo.lock
+
+# Install dependensi untuk build di Debian
+RUN apt-get update && \
+    apt-get install -y pkg-config libssl-dev build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a dummy main.rs to build dependencies
 RUN mkdir -p src && \
@@ -27,7 +33,7 @@ FROM debian:bullseye-slim
 
 WORKDIR /app
 
-# Install OpenSSL, CA certificates, and curl (untuk healthcheck)
+# Install OpenSSL, CA certificates, dan curl (untuk healthcheck)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
