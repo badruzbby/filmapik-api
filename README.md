@@ -77,14 +77,6 @@ docker-compose up -d --build
 # API akan tersedia di http://localhost:8080
 ```
 
-## 📚 Dokumentasi API
-
-Dokumentasi API tersedia dalam format Swagger dan dapat diakses melalui swagger.yaml di root proyek atau melalui endpoint:
-
-```
-http://localhost:8080/docs
-```
-
 ### Endpoint Utama
 
 Berikut adalah endpoint utama yang tersedia di API:
@@ -101,7 +93,7 @@ Berikut adalah endpoint utama yang tersedia di API:
 - `GET /api/country` - Mendapatkan daftar negara
 
 #### Cache
-- `GET /api/cache/status` - Mendapatkan status cache
+- `GET /api/cache/staus` - Mendapatkan status cache
 - `POST /api/cache/clear` - Membersihkan cache
 
 Semua endpoint mendukung parameter paginasi `?page=1` (default: 1).
