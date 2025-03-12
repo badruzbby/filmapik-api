@@ -38,7 +38,7 @@ FilmApik API adalah sebuah REST API yang dibangun dengan Rust dan Actix Web untu
 
 1. Kloning repositori
    ```bash
-   git clone <repository-url> filmapik-api
+   git clone https://github.com/badruzbby/filmapik-api
    cd filmapik-api
    ```
 
