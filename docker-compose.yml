@@ -1,21 +1,25 @@
-version: '3.3'
+version: '3.8'
 
 services:
-  api:
+  filmapik-api:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: filmapik-api
+    restart: always
     ports:
       - "8080:8080"
     environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8080
       - RUST_LOG=info
-      - FILMAPIK_URL=https://filmapik.cam
+      - FILMAPIK_URL=http://194.102.105.201
     volumes:
-      - ./cache:/app/cache
-    restart: unless-stopped
+      - ./swagger.yaml:/app/swagger.yaml
+    # Healthcheck untuk memastikan aplikasi berjalan dengan baik
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/movie/latest"]
-      interval: 1m
+      test: ["CMD", "curl", "-f", "http://localhost:8080", "||", "exit", "1"]
+      interval: 30s
       timeout: 10s
-      retries: 3 
+      retries: 5
+      start_period: 20s 

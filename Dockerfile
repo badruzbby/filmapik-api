@@ -1,51 +1,47 @@
-FROM rust:1.81-slim as builder
+# Tahap build
+FROM rust:latest as builder
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy manifest files
-COPY Cargo.toml ./
+# Menyalin file manifes Cargo
+COPY Cargo.toml Cargo.lock ./
 
-# Buat Cargo.lock baru di dalam container (jangan gunakan yang dari host)
-RUN touch Cargo.lock
-
-# Install dependensi untuk build di Debian
-RUN apt-get update && \
-    apt-get install -y pkg-config libssl-dev build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create a dummy main.rs to build dependencies
+# Menerapkan teknik cache layer untuk dependensi
 RUN mkdir -p src && \
-    echo "fn main() {}" > src/main.rs && \
-    # Buat Cargo.lock yang kompatibel dengan versi Cargo di container
-    cargo update && \
+    echo "fn main() {println!(\"dummy build\")}" > src/main.rs && \
     cargo build --release && \
     rm -rf src
 
-# Copy actual source code, kecuali Cargo.lock (gunakan .dockerignore)
-COPY . .
+# Menyalin kode sumber aktual
+COPY src ./src
+COPY swagger.yaml ./
 
-# Build the application
-RUN cargo build --release
+# Memaksa Cargo untuk membangun kembali dengan kode sumber yang sebenarnya
+RUN touch src/main.rs && \
+    cargo build --release
 
-# Runtime stage - menggunakan Debian Bookworm yang memiliki GLIBC 2.34
+# Tahap produksi 
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-# Install OpenSSL, CA certificates, dan curl (untuk healthcheck)
+# Menginstal dependensi runtime yang diperlukan
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ca-certificates \
-    libssl-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the binary from builder stage
-COPY --from=builder /app/target/release/filmapik-api /app/filmapik-api
+# Menyalin executable dari tahap build
+COPY --from=builder /usr/src/app/target/release/filmapik-api /app/filmapik-api
+COPY --from=builder /usr/src/app/swagger.yaml /app/swagger.yaml
 
-# Expose the port the API listens on
+# Mengkonfigurasi variabel lingkungan
+ENV APP_HOST=0.0.0.0
+ENV APP_PORT=8080
+ENV RUST_LOG=info
+ENV FILMAPIK_URL=http://194.102.105.201
+
+# Expose port
 EXPOSE 8080
 
-# Run the API
-CMD ["/app/filmapik-api"] 
+# Perintah untuk menjalankan aplikasi
+CMD ["./filmapik-api"] 
