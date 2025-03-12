@@ -167,6 +167,19 @@ ERROR: Service 'api' failed to build: COPY failed: file not found in build conte
 2. Atau jalankan `cargo build` terlebih dahulu untuk menghasilkan file `Cargo.lock`
 3. Jika belum memiliki file `Cargo.lock`, jalankan `cargo update` untuk membuatnya
 
+**Masalah: Edition 2024 tidak didukung**
+
+Jika Anda mendapatkan error seperti:
+```
+error: failed to parse manifest at `/app/Cargo.toml`
+Caused by:
+  feature `edition2024` is required
+```
+
+**Solusi**:
+1. Ubah nilai `edition` di `Cargo.toml` dari `"2024"` ke `"2021"`
+2. Atau gunakan image Docker dengan Rust versi nightly yang mendukung edition 2024
+
 **Masalah: Docker command not found**
 
 Jika Anda mendapatkan error bahwa perintah Docker tidak ditemukan:
