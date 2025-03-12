@@ -16,8 +16,6 @@ REST API untuk mendapatkan informasi film dari FilmApik menggunakan Rust.
 - **Pagination** untuk mengakses halaman film yang berbeda
 - **Browser Headers** untuk scraping yang otentik dan menghindari pemblokiran
 - **Caching System** untuk respons API yang lebih cepat dan mengurangi beban server
-- Menggunakan scraping dari website FilmApik
-- Struktur kode yang mengikuti best practice Rust
 
 ## Sistem Caching
 
@@ -94,6 +92,12 @@ Ketik `./run-docker.sh` atau `run-docker.bat` tanpa argumen untuk melihat opsi y
 #### Langkah-langkah
 
 1. Clone repositori ini
+
+```bash
+git clone https://github.com/badruzbby/filmapik-api/
+cd filmapik-api
+```
+
 2. Jalankan aplikasi:
 
 ```bash
@@ -448,7 +452,6 @@ API ini menggunakan teknik scraping dan proxy yang canggih dan etis:
 1. *Header Browser* - Menggunakan header HTTP yang sama persis dengan browser asli:
    - User-Agent: `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0`
    - Accept: `text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7`
-   - Accept-Encoding: `gzip, deflate, br, zstd`
    - Accept-Language: `en-US,en;q=0.9`
    - Sec-Ch-UA, Sec-Fetch-* headers untuk identifikasi browser
    - Host, Referer, dan Connection yang tepat
