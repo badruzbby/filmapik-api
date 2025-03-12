@@ -37,6 +37,33 @@ Manfaat caching:
 
 ### Menggunakan Docker
 
+#### Instalasi Docker
+
+Sebelum menggunakan Docker, pastikan Docker dan Docker Compose sudah terinstal:
+
+**Untuk Windows:**
+1. Unduh dan instal [Docker Desktop untuk Windows](https://www.docker.com/products/docker-desktop/)
+2. Ikuti wizard instalasi
+3. Setelah instalasi selesai, Docker Desktop akan berjalan otomatis
+
+**Untuk Linux:**
+```bash
+# Instal Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Instal Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+**Untuk macOS:**
+1. Unduh dan instal [Docker Desktop untuk Mac](https://www.docker.com/products/docker-desktop/)
+2. Ikuti wizard instalasi
+3. Setelah instalasi selesai, Docker Desktop akan berjalan otomatis
+
+#### Menjalankan Aplikasi
+
 Cara termudah untuk menjalankan FilmApik API adalah menggunakan Docker:
 
 1. Pastikan Docker dan Docker Compose sudah terinstal di sistem Anda
@@ -113,6 +140,68 @@ Anda dapat mengkonfigurasi aplikasi menggunakan variabel lingkungan atau file `.
 - `APP_HOST` - Host tempat server berjalan (default: 127.0.0.1)
 - `APP_PORT` - Port tempat server berjalan (default: 8080)
 - `FILMAPIK_URL` - URL dari website FilmApik (default: http://194.102.105.201)
+
+## Pemecahan Masalah Docker
+
+### Error dengan Docker Compose
+
+**Masalah: Properti tidak didukung**
+
+Jika Anda mendapatkan error seperti:
+```
+ERROR: The Compose file './docker-compose.yml' is invalid because:
+services.api.healthcheck value Additional properties are not allowed ('start_period' was unexpected)
+```
+
+**Solusi**: Anda menggunakan versi Docker Compose yang lebih lama yang tidak mendukung properti tertentu. Gunakan file `docker-compose.yml` dan `docker-compose.prod.yml` yang sudah dimodifikasi di repositori ini, atau upgrade Docker Compose Anda ke versi terbaru.
+
+**Masalah: File Cargo.lock tidak ditemukan**
+
+Jika Anda mendapatkan error seperti:
+```
+ERROR: Service 'api' failed to build: COPY failed: file not found in build context or excluded by .dockerignore: stat Cargo.lock: file does not exist
+```
+
+**Solusi**: 
+1. Pastikan file `Cargo.lock` tidak dimasukkan ke dalam `.dockerignore`
+2. Atau jalankan `cargo build` terlebih dahulu untuk menghasilkan file `Cargo.lock`
+3. Jika belum memiliki file `Cargo.lock`, jalankan `cargo update` untuk membuatnya
+
+**Masalah: Docker command not found**
+
+Jika Anda mendapatkan error bahwa perintah Docker tidak ditemukan:
+```
+Command 'docker' not found
+```
+
+**Solusi**: Pastikan Docker sudah terinstal dengan benar. Lihat petunjuk instalasi di bagian "Instalasi Docker" di atas.
+
+**Masalah: Permission denied**
+
+Jika Anda mendapatkan error permission denied saat menjalankan Docker di Linux:
+```
+Got permission denied while trying to connect to the Docker daemon socket
+```
+
+**Solusi**:
+```bash
+sudo usermod -aG docker $USER
+# Log out dan log in lagi
+```
+
+### Memeriksa Log Container
+
+Jika aplikasi tidak berjalan dengan benar, periksa log container:
+```bash
+docker-compose logs -f
+```
+
+### Masuk ke Container
+
+Jika Anda perlu melakukan debug di dalam container:
+```bash
+docker-compose exec api /bin/bash
+```
 
 ## Endpoint API
 

@@ -9,8 +9,19 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}FilmApik API Docker Helper${NC}"
 echo "------------------------"
 
-if [ "$1" == "build" ]; then
+if [ "$1" == "prepare" ]; then
+    echo -e "${GREEN}Mempersiapkan proyek untuk Docker build...${NC}"
+    echo -e "Menjalankan cargo update untuk memastikan Cargo.lock ada..."
+    cargo update
+    echo -e "${GREEN}Persiapan selesai!${NC}"
+
+elif [ "$1" == "build" ]; then
     echo -e "${GREEN}Building Docker image...${NC}"
+    echo -e "Memastikan Cargo.lock ada..."
+    if [ ! -f "Cargo.lock" ]; then
+        echo -e "${BLUE}File Cargo.lock tidak ditemukan. Menjalankan cargo update...${NC}"
+        cargo update
+    fi
     docker-compose build --no-cache
     echo -e "${GREEN}Build completed!${NC}"
 
@@ -49,6 +60,7 @@ else
     echo "Cara penggunaan: ./run-docker.sh [PERINTAH]"
     echo ""
     echo "Perintah yang tersedia:"
+    echo "  prepare - Menyiapkan proyek untuk build (menjalankan cargo update)"
     echo "  build   - Build ulang Docker image (gunakan jika ada perubahan kode)"
     echo "  start   - Mulai container FilmApik API (alias: up)"
     echo "  stop    - Hentikan container FilmApik API (alias: down)"
@@ -57,4 +69,7 @@ else
     echo "  status  - Tampilkan status container"
     echo ""
     echo "Contoh: ./run-docker.sh start"
+    echo ""
+    echo "Pemecahan Masalah:"
+    echo "  Jika menemui error 'Cargo.lock not found', jalankan './run-docker.sh prepare' terlebih dahulu"
 fi 
