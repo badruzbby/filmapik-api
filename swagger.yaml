@@ -1,0 +1,808 @@
+openapi: 3.0.0
+info:
+  title: FilmApik API
+  description: |
+    REST API untuk mendapatkan informasi film dari FilmApik menggunakan Rust.
+    
+    API ini memungkinkan pengguna untuk:
+    - Mendapatkan daftar film terbaru
+    - Mencari film berdasarkan genre
+    - Mencari film berdasarkan negara
+    - Mendapatkan detail film
+    - Menonton film via iframe
+    - Dan banyak fitur lainnya
+    
+    ## Fitur Caching
+    
+    API ini mengimplementasikan sistem caching yang kuat untuk meningkatkan performa dan mengurangi beban pada server FilmApik:
+    
+    - **Film dan Daftar Film**: Cache selama 30 menit
+    - **Detail Film**: Cache selama 1 jam
+    - **Genre**: Cache selama 24 jam (jarang berubah)
+    - **Negara**: Cache selama 24 jam (jarang berubah)
+    
+    Sistem caching secara otomatis mengelola data yang sering diakses, sehingga mengurangi jumlah request ke server FilmApik dan mempercepat respons API secara signifikan.
+  version: 1.0.0
+  contact:
+    name: FilmApik API Team
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local Development Server
+
+tags:
+  - name: movie
+    description: Endpoint terkait film
+  - name: genre
+    description: Endpoint terkait genre film
+  - name: country
+    description: Endpoint terkait negara asal film
+  - name: watch
+    description: Endpoint untuk menonton film
+  - name: cache
+    description: Endpoint terkait manajemen cache
+
+paths:
+  /movie/latest:
+    get:
+      tags:
+        - movie
+      summary: Mendapatkan daftar film terbaru
+      description: Mengembalikan daftar film terbaru dari FilmApik dengan dukungan pagination
+      operationId: getLatestMovies
+      parameters:
+        - name: page
+          in: query
+          description: Nomor halaman yang ingin diambil (default: 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Daftar film terbaru berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/popular:
+    get:
+      tags:
+        - movie
+      summary: Mendapatkan daftar film populer (rating tertinggi)
+      description: Mengembalikan daftar film dengan rating tertinggi dari FilmApik dengan dukungan pagination
+      operationId: getPopularMovies
+      parameters:
+        - name: page
+          in: query
+          description: Nomor halaman yang ingin diambil (default: 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Daftar film populer berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/genre:
+    get:
+      tags:
+        - genre
+      summary: Mendapatkan daftar genre film
+      description: Mengembalikan daftar genre film yang tersedia di FilmApik
+      operationId: getGenres
+      responses:
+        '200':
+          description: Daftar genre film berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenreResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/genre/{genre_id}:
+    get:
+      tags:
+        - genre
+        - movie
+      summary: Mendapatkan daftar film berdasarkan genre
+      description: Mengembalikan daftar film dengan genre tertentu dari FilmApik dengan dukungan pagination
+      operationId: getMoviesByGenre
+      parameters:
+        - name: genre_id
+          in: path
+          description: ID genre film (contoh: "action", "comedy", "horror", dll)
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Nomor halaman yang ingin diambil (default: 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Daftar film berdasarkan genre berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieResponse'
+        '400':
+          description: Genre ID tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/country:
+    get:
+      tags:
+        - country
+      summary: Mendapatkan daftar negara asal film
+      description: Mengembalikan daftar negara asal film yang tersedia di FilmApik
+      operationId: getCountries
+      responses:
+        '200':
+          description: Daftar negara asal film berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/country/{country_id}:
+    get:
+      tags:
+        - country
+        - movie
+      summary: Mendapatkan daftar film berdasarkan negara
+      description: Mengembalikan daftar film berdasarkan negara asal dari FilmApik dengan dukungan pagination
+      operationId: getMoviesByCountry
+      parameters:
+        - name: country_id
+          in: path
+          description: ID negara film (contoh: "usa", "korea", "india", dll)
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Nomor halaman yang ingin diambil (default: 1)
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+      responses:
+        '200':
+          description: Daftar film berdasarkan negara berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieResponse'
+        '400':
+          description: Country ID tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/{movie_id}:
+    get:
+      tags:
+        - movie
+      summary: Mendapatkan detail film
+      description: Mengembalikan detail lengkap film berdasarkan ID film
+      operationId: getMovieDetail
+      parameters:
+        - name: movie_id
+          in: path
+          description: ID film (biasanya berupa judul film yang di-slugify, contoh "paayum-oli-nee-yenakku-2023")
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detail film berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieDetailResponse'
+        '400':
+          description: Movie ID tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Film tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/{movie_id}/watch:
+    get:
+      tags:
+        - watch
+      summary: Menonton film via iframe
+      description: |
+        Mengembalikan halaman HTML yang berisi iframe untuk memutar video.
+        Endpoint ini menggunakan reverse proxy internal untuk bypass Content Security Policy (CSP).
+        Hal ini memungkinkan video diputar tanpa kendala pembatasan iframe dari sumber asli.
+      operationId: watchMovie
+      parameters:
+        - name: movie_id
+          in: path
+          description: ID film (biasanya berupa judul film yang di-slugify, contoh "paayum-oli-nee-yenakku-2023")
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: HTML dengan iframe untuk memutar video
+          content:
+            text/html:
+              schema:
+                type: string
+        '400':
+          description: Movie ID tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: URL video tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /movie/{movie_id}/watch/proxy:
+    get:
+      tags:
+        - watch
+      summary: Proxy konten video
+      description: |
+        Memproxy konten video dari sumber asli. Endpoint ini biasanya tidak perlu diakses secara langsung 
+        karena digunakan secara internal oleh endpoint `/watch`.
+        
+        Fitur yang dilakukan:
+        - Memproxy konten video dari sumber asli
+        - Memodifikasi header respons untuk mengizinkan embedding
+        - Menggunakan header identik dengan Chrome/Edge browser asli
+        - Mengimplementasikan Sec-Fetch-* headers untuk mensimulasikan perilaku iframe
+        - Memfilter header yang dapat menyebabkan masalah pada respons proxy
+      operationId: proxyVideoContent
+      parameters:
+        - name: movie_id
+          in: path
+          description: ID film (biasanya berupa judul film yang di-slugify, contoh "paayum-oli-nee-yenakku-2023")
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Konten video dari sumber asli dengan header yang dimodifikasi untuk memungkinkan embedding
+          content:
+            video/*:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Movie ID tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: URL video tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cache/stats:
+    get:
+      tags:
+        - cache
+      summary: Mendapatkan statistik cache
+      description: Mengembalikan informasi tentang status cache saat ini, termasuk jumlah item dalam cache dan statistik hit/miss
+      operationId: getCacheStats
+      responses:
+        '200':
+          description: Statistik cache berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheStatsResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cache/clear:
+    post:
+      tags:
+        - cache
+      summary: Menghapus semua cache
+      description: Menghapus semua data yang tersimpan dalam cache dan memaksanya memuat ulang dari sumber
+      operationId: clearCache
+      responses:
+        '200':
+          description: Cache berhasil dihapus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cache/refresh/{cache_type}:
+    post:
+      tags:
+        - cache
+      summary: Memperbarui cache tertentu
+      description: Memperbarui cache dari tipe tertentu (genre, countries, dll) dengan data terbaru dari sumber
+      operationId: refreshCache
+      parameters:
+        - name: cache_type
+          in: path
+          description: Tipe cache yang akan diperbarui (genres, countries)
+          required: true
+          schema:
+            type: string
+            enum: [genres, countries]
+      responses:
+        '200':
+          description: Cache berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Tipe cache tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Movie:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID film (biasanya berupa judul film yang di-slugify)
+          example: "paayum-oli-nee-yenakku-2023"
+        title:
+          type: string
+          description: Judul film
+          example: "Paayum Oli Nee Yenakku"
+        poster:
+          type: string
+          description: URL poster film
+          example: "http://example.com/poster.jpg"
+        year:
+          type: integer
+          description: Tahun rilis film
+          nullable: true
+          example: 2023
+        rating:
+          type: number
+          format: float
+          description: Rating film (skala 1-10)
+          nullable: true
+          example: 7.5
+        quality:
+          type: string
+          description: Kualitas film (HD, BluRay, dll)
+          nullable: true
+          example: "HD"
+        genres:
+          type: array
+          description: Daftar genre film
+          items:
+            type: string
+          example: ["Action", "Thriller"]
+        url:
+          type: string
+          description: URL halaman detail film
+          example: "http://194.102.105.201/paayum-oli-nee-yenakku-2023/"
+      required:
+        - id
+        - title
+        - poster
+        - genres
+        - url
+
+    MovieDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID film (biasanya berupa judul film yang di-slugify)
+          example: "paayum-oli-nee-yenakku-2023"
+        title:
+          type: string
+          description: Judul film
+          example: "Paayum Oli Nee Yenakku"
+        poster:
+          type: string
+          description: URL poster film
+          example: "http://example.com/poster.jpg"
+        rating:
+          type: number
+          format: float
+          description: Rating film (skala 1-10)
+          nullable: true
+          example: 7.5
+        rating_count:
+          type: integer
+          description: Jumlah orang yang memberikan rating
+          nullable: true
+          example: 1000
+        description:
+          type: string
+          description: Deskripsi atau sinopsis film
+          nullable: true
+          example: "Deskripsi film..."
+        views:
+          type: integer
+          description: Jumlah penonton film
+          nullable: true
+          example: 10000
+        genres:
+          type: array
+          description: Daftar genre film
+          items:
+            type: string
+          example: ["Action", "Thriller"]
+        quality:
+          type: string
+          description: Kualitas film (HD, BluRay, dll)
+          nullable: true
+          example: "HD"
+        year:
+          type: integer
+          description: Tahun rilis film
+          nullable: true
+          example: 2023
+        duration:
+          type: string
+          description: Durasi film
+          nullable: true
+          example: "118 min"
+        country:
+          type: string
+          description: Negara asal film
+          nullable: true
+          example: "India"
+        release_date:
+          type: string
+          description: Tanggal rilis film
+          nullable: true
+          example: "23 Jun 2023"
+        language:
+          type: string
+          description: Bahasa film
+          nullable: true
+          example: "Tamil"
+        director:
+          type: string
+          description: Sutradara film
+          nullable: true
+          example: "Karthik Adwait"
+        actors:
+          type: array
+          description: Daftar aktor/aktris dalam film
+          items:
+            type: string
+          example: ["Aktor 1", "Aktor 2"]
+        url:
+          type: string
+          description: URL halaman detail film
+          example: "http://194.102.105.201/paayum-oli-nee-yenakku-2023/"
+        watch_url:
+          type: string
+          description: URL untuk menonton film
+          nullable: true
+          example: "https://example.com/embed/video123"
+        related_movies:
+          type: array
+          description: Daftar film terkait
+          items:
+            $ref: '#/components/schemas/Movie'
+      required:
+        - id
+        - title
+        - poster
+        - genres
+        - url
+
+    Genre:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID genre
+          example: "action"
+        name:
+          type: string
+          description: Nama genre
+          example: "Action"
+        url:
+          type: string
+          description: URL genre
+          example: "http://194.102.105.201/genre/action/"
+      required:
+        - id
+        - name
+        - url
+
+    Country:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID negara
+          example: "usa"
+        name:
+          type: string
+          description: Nama negara
+          example: "USA"
+        url:
+          type: string
+          description: URL negara
+          example: "http://194.102.105.201/country/usa/"
+      required:
+        - id
+        - name
+        - url
+
+    PaginationInfo:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          description: Halaman saat ini
+          example: 1
+        per_page:
+          type: integer
+          description: Jumlah item per halaman
+          example: 24
+        total_items:
+          type: integer
+          description: Total item yang tersedia
+          nullable: true
+          example: null
+        total_pages:
+          type: integer
+          description: Total halaman yang tersedia
+          nullable: true
+          example: null
+      required:
+        - current_page
+        - per_page
+
+    MovieResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "success"
+        message:
+          type: string
+          description: Pesan respons
+          example: "Film terbaru halaman 1 berhasil didapatkan"
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+        data:
+          type: array
+          description: Daftar film
+          items:
+            $ref: '#/components/schemas/Movie'
+      required:
+        - status
+        - message
+        - pagination
+        - data
+
+    MovieDetailResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "success"
+        message:
+          type: string
+          description: Pesan respons
+          example: "Detail film Paayum Oli Nee Yenakku berhasil didapatkan"
+        data:
+          $ref: '#/components/schemas/MovieDetail'
+      required:
+        - status
+        - message
+        - data
+
+    GenreResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "success"
+        message:
+          type: string
+          description: Pesan respons
+          example: "Daftar genre film berhasil didapatkan"
+        data:
+          type: array
+          description: Daftar genre
+          items:
+            $ref: '#/components/schemas/Genre'
+      required:
+        - status
+        - message
+        - data
+
+    CountryResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "success"
+        message:
+          type: string
+          description: Pesan respons
+          example: "Daftar negara film berhasil didapatkan"
+        data:
+          type: array
+          description: Daftar negara
+          items:
+            $ref: '#/components/schemas/Country'
+      required:
+        - status
+        - message
+        - data
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "error"
+        message:
+          type: string
+          description: Pesan error
+          example: "Movie ID tidak valid"
+      required:
+        - status
+        - message
+
+    CacheStatsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "success"
+        message:
+          type: string
+          description: Pesan respons
+          example: "Statistik cache berhasil didapatkan"
+        data:
+          type: object
+          properties:
+            movies:
+              type: integer
+              description: Jumlah film dalam cache
+              example: 120
+            genres:
+              type: integer
+              description: Jumlah genre dalam cache
+              example: 17
+            countries:
+              type: integer
+              description: Jumlah negara dalam cache
+              example: 24
+            details:
+              type: integer
+              description: Jumlah detail film dalam cache
+              example: 35
+      required:
+        - status
+        - message
+        - data
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Status respons
+          example: "success"
+        message:
+          type: string
+          description: Pesan respons
+          example: "Operasi berhasil dilakukan"
+      required:
+        - status
+        - message 
