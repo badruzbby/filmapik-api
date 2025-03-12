@@ -18,6 +18,7 @@ RUN apt-get update && \
 RUN mkdir -p src && \
     echo "fn main() {}" > src/main.rs && \
     # Buat Cargo.lock yang kompatibel dengan versi Cargo di container
+    # Versi nightly sudah mendukung semua dependensi (litemap, zerofrom, native-tls) dan edition 2024
     cargo update && \
     cargo build --release && \
     rm -rf src
