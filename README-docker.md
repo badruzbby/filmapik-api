@@ -42,7 +42,7 @@ sudo usermod -aG docker $USER
 1. Kloning repositori (jika menggunakan Git) atau salin seluruh kode ke server
 
 ```bash
-git clone <repository-url> filmapik-api
+git clone https://github.com/badruzbby/filmapik-api
 cd filmapik-api
 ```
 
