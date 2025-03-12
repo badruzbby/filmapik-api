@@ -95,7 +95,7 @@ Berikut adalah endpoint utama yang tersedia di API:
 - `GET /api/movie/genre` - Mendapatkan daftar genre film
 - `GET /api/movie/genre/{genre}` - Mendapatkan daftar film berdasarkan genre
 - `GET /api/movie/detail/{id}` - Mendapatkan detail film berdasarkan ID
-- `GET /api/movie/watch/{id}` - Mendapatkan URL untuk menonton film
+- `GET /api/movie/{id}/watch` - Mendapatkan URL untuk menonton film
 
 #### Negara / Country
 - `GET /api/country` - Mendapatkan daftar negara
