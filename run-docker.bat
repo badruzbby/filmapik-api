@@ -9,6 +9,15 @@ if "%1"=="prepare" (
     echo Menjalankan cargo update untuk memastikan Cargo.lock ada...
     cargo update
     echo Persiapan selesai!
+) else if "%1"=="clean-lock" (
+    echo Menghapus Cargo.lock untuk mengatasi masalah versi...
+    if exist Cargo.lock (
+        del Cargo.lock
+        echo File Cargo.lock berhasil dihapus.
+    ) else (
+        echo File Cargo.lock tidak ditemukan.
+    )
+    echo Selesai.
 ) else if "%1"=="build" (
     echo Building Docker image...
     echo Memastikan Cargo.lock ada...
@@ -91,6 +100,7 @@ if "%1"=="prepare" (
     echo.
     echo Perintah yang tersedia:
     echo   prepare       - Menyiapkan proyek untuk build (menjalankan cargo update)
+    echo   clean-lock    - Menghapus Cargo.lock untuk mengatasi masalah versi
     echo   build         - Build ulang Docker image (gunakan jika ada perubahan kode)
     echo   build-nightly - Build ulang Docker image dengan Rust nightly (mendukung edition 2024)
     echo   start         - Mulai container FilmApik API (alias: up)
@@ -109,6 +119,7 @@ if "%1"=="prepare" (
     echo Pemecahan Masalah:
     echo   Jika menemui error 'Cargo.lock not found', jalankan 'run-docker.bat prepare' terlebih dahulu
     echo   Jika menemui error 'edition2024 is required', gunakan 'run-docker.bat build-nightly'
+    echo   Jika menemui error 'lock file version 4', jalankan 'run-docker.bat clean-lock' untuk membersihkan Cargo.lock
 )
 
 endlocal 

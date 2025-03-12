@@ -5,18 +5,18 @@ WORKDIR /app
 # Copy manifest files
 COPY Cargo.toml ./
 
-# Salin Cargo.lock jika ada
-COPY Cargo.lock* ./
+# Buat Cargo.lock baru di dalam container (jangan gunakan yang dari host)
+RUN touch Cargo.lock
 
 # Create a dummy main.rs to build dependencies
 RUN mkdir -p src && \
     echo "fn main() {}" > src/main.rs && \
-    # Buat Cargo.lock jika belum ada
+    # Buat Cargo.lock yang kompatibel dengan versi Cargo di container
     cargo update && \
     cargo build --release && \
     rm -rf src
 
-# Copy actual source code
+# Copy actual source code, kecuali Cargo.lock (gunakan .dockerignore)
 COPY . .
 
 # Build the application

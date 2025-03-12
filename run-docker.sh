@@ -15,6 +15,16 @@ if [ "$1" == "prepare" ]; then
     cargo update
     echo -e "${GREEN}Persiapan selesai!${NC}"
 
+elif [ "$1" == "clean-lock" ]; then
+    echo -e "${RED}Menghapus Cargo.lock untuk mengatasi masalah versi...${NC}"
+    if [ -f "Cargo.lock" ]; then
+        rm Cargo.lock
+        echo -e "${GREEN}File Cargo.lock berhasil dihapus.${NC}"
+    else
+        echo -e "${BLUE}File Cargo.lock tidak ditemukan.${NC}"
+    fi
+    echo -e "${GREEN}Selesai.${NC}"
+
 elif [ "$1" == "build" ]; then
     echo -e "${GREEN}Building Docker image...${NC}"
     echo -e "Memastikan Cargo.lock ada..."
@@ -102,6 +112,7 @@ else
     echo ""
     echo "Perintah yang tersedia:"
     echo "  prepare       - Menyiapkan proyek untuk build (menjalankan cargo update)"
+    echo "  clean-lock    - Menghapus Cargo.lock untuk mengatasi masalah versi"
     echo "  build         - Build ulang Docker image (gunakan jika ada perubahan kode)"
     echo "  build-nightly - Build ulang Docker image dengan Rust nightly (mendukung edition 2024)"
     echo "  start         - Mulai container FilmApik API (alias: up)"
@@ -120,4 +131,5 @@ else
     echo "Pemecahan Masalah:"
     echo "  Jika menemui error 'Cargo.lock not found', jalankan './run-docker.sh prepare' terlebih dahulu"
     echo "  Jika menemui error 'edition2024 is required', gunakan './run-docker.sh build-nightly'"
+    echo "  Jika menemui error 'lock file version 4', jalankan './run-docker.sh clean-lock' untuk membersihkan Cargo.lock"
 fi 

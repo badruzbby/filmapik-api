@@ -167,6 +167,20 @@ ERROR: Service 'api' failed to build: COPY failed: file not found in build conte
 2. Atau jalankan `cargo build` terlebih dahulu untuk menghasilkan file `Cargo.lock`
 3. Jika belum memiliki file `Cargo.lock`, jalankan `cargo update` untuk membuatnya
 
+**Masalah: Versi Cargo.lock tidak kompatibel**
+
+Jika Anda mendapatkan error seperti:
+```
+error: failed to parse lock file at: /app/Cargo.lock
+Caused by:
+  lock file version `4` was found, but this version of Cargo does not understand this lock file
+```
+
+**Solusi**:
+1. Dockerfile telah dimodifikasi untuk mengabaikan `Cargo.lock` dari host dan membuat file baru yang kompatibel di dalam container
+2. Jika masalah berlanjut, hapus `Cargo.lock` dari project dan biarkan Docker build menghasilkannya sendiri
+3. Atau gunakan image Docker dengan versi Rust yang lebih baru yang mendukung format Cargo.lock versi 4
+
 **Masalah: Edition 2024 tidak didukung**
 
 Jika Anda mendapatkan error seperti:
