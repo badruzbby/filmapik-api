@@ -37,12 +37,61 @@ Manfaat caching:
 
 ## Cara Menjalankan
 
-### Prasyarat
+### Menggunakan Docker
+
+Cara termudah untuk menjalankan FilmApik API adalah menggunakan Docker:
+
+1. Pastikan Docker dan Docker Compose sudah terinstal di sistem Anda
+2. Clone repositori ini
+3. Jalankan dengan Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+4. API akan berjalan pada http://localhost:8080
+
+Untuk menghentikan API:
+
+```bash
+docker-compose down
+```
+
+#### Di Lingkungan Produksi
+
+Untuk menjalankan di lingkungan produksi, gunakan file konfigurasi `docker-compose.prod.yml`:
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+Film API akan berjalan pada port 80. Anda juga dapat mengaktifkan proxy Nginx dengan menghapus komentar pada bagian `web` di file `docker-compose.prod.yml`.
+
+#### Menggunakan Script Helper
+
+Kami juga menyediakan script helper untuk memudahkan menjalankan Docker:
+
+- Pada Linux/macOS:
+  ```bash
+  chmod +x run-docker.sh
+  ./run-docker.sh start
+  ```
+
+- Pada Windows:
+  ```batch
+  run-docker.bat start
+  ```
+
+Ketik `./run-docker.sh` atau `run-docker.bat` tanpa argumen untuk melihat opsi yang tersedia.
+
+### Tanpa Docker
+
+#### Prasyarat
 
 - Rust dan Cargo harus terinstal di sistem Anda
 - (Opsional) File `.env` untuk konfigurasi
 
-### Langkah-langkah
+#### Langkah-langkah
 
 1. Clone repositori ini
 2. Jalankan aplikasi:
@@ -386,17 +435,17 @@ GET /api/movie/paayum-oli-nee-yenakku-2023/watch/proxy
 Parameter Path:
 - `movie_id`: ID film (biasanya berupa judul film yang di-slugify, contoh: "paayum-oli-nee-yenakku-2023")
 
-**Response:**
+*Response:*
 - Konten video dari sumber asli dengan header yang dimodifikasi untuk memungkinkan embedding
 - 404 Not Found jika URL video tidak tersedia
 
-**Catatan:** Endpoint ini biasanya tidak perlu diakses secara langsung karena digunakan secara internal oleh endpoint `/watch`.
+*Catatan:* Endpoint ini biasanya tidak perlu diakses secara langsung karena digunakan secara internal oleh endpoint `/watch`.
 
 ## Teknik Scraping dan Proxy
 
 API ini menggunakan teknik scraping dan proxy yang canggih dan etis:
 
-1. **Header Browser** - Menggunakan header HTTP yang sama persis dengan browser asli:
+1. *Header Browser* - Menggunakan header HTTP yang sama persis dengan browser asli:
    - User-Agent: `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0`
    - Accept: `text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7`
    - Accept-Encoding: `gzip, deflate, br, zstd`
@@ -405,11 +454,11 @@ API ini menggunakan teknik scraping dan proxy yang canggih dan etis:
    - Host, Referer, dan Connection yang tepat
    - Dan header lainnya untuk meningkatkan otentisitas
 
-2. **Error Handling** - Mendeteksi status HTTP error dan memberikan pesan yang jelas
+2. *Error Handling* - Mendeteksi status HTTP error dan memberikan pesan yang jelas
    
-3. **Pagination** - Melakukan scraping halaman yang berbeda berdasarkan parameter
+3. *Pagination* - Melakukan scraping halaman yang berbeda berdasarkan parameter
 
-4. **Reverse Proxy** - Teknik bypass untuk Content Security Policy:
+4. *Reverse Proxy* - Teknik bypass untuk Content Security Policy:
    - Memproxy konten video dari sumber asli
    - Memodifikasi header respons untuk mengizinkan embedding
    - Menggunakan header identik dengan Chrome/Edge browser asli

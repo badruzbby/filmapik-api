@@ -1,0 +1,31 @@
+# Rust/Cargo
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+tests/
+
+# Docker volume
+cache/
+
+# Misc
+LICENSE
+README.md
+.env.example 
