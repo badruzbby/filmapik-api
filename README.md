@@ -16,8 +16,6 @@ REST API untuk mendapatkan informasi film dari FilmApik menggunakan Rust.
 - **Pagination** untuk mengakses halaman film yang berbeda
 - **Browser Headers** untuk scraping yang otentik dan menghindari pemblokiran
 - **Caching System** untuk respons API yang lebih cepat dan mengurangi beban server
-- Menggunakan scraping dari website FilmApik
-- Struktur kode yang mengikuti best practice Rust
 
 ## Sistem Caching
 
