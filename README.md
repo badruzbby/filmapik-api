@@ -45,6 +45,12 @@ Manfaat caching:
 ### Langkah-langkah
 
 1. Clone repositori ini
+
+```bash
+git clone https://github.com/badruzbby/filmapik-api/
+cd filmapik-api
+```
+
 2. Jalankan aplikasi:
 
 ```bash
