@@ -122,14 +122,6 @@ Semua endpoint mendukung parameter paginasi `?page=1` (default: 1).
 }
 ```
 
-## 🧪 Pengujian
-
-Untuk menjalankan test:
-
-```bash
-cargo test
-```
-
 ## 📝 Lisensi
 
 Proyek ini dilisensikan di bawah lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail lebih lanjut.
